@@ -32,7 +32,7 @@ boxHeight :: Float
 boxHeight = fromIntegral (min screenHeight screenWidth) / fromIntegral (n + 1)
 
 -- Game
-initialGame = Game { gameBoard = array indexRange $ zip (range indexRange) (cycle [Nothing])]
+initialGame = Game { gameBoard = array indexRange $ zip (range indexRange) (cycle [Nothing])
                    , gamePlayer = Player1
                    , gameState = Running
                    }
