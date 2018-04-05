@@ -1,10 +1,15 @@
 module Main where
 
 import Graphics.Gloss
+import Graphics.Gloss.Data.Color
 
-window = InWindow "Dots and Boxes" (200, 200) (10, 10)
+import Game
+import Logic
+import Rendering
 
-backgroundColor = black
+window = InWindow "Dots and Boxes" (screenWidth, screenHeight) (100, 100)
+
+backgroundColor = makeColor 0 0 0 255
 
 main :: IO ()
 main = play window backgroundColor 30 initialGame gameAsPicture transformGame (const id)
