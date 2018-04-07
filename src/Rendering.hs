@@ -6,17 +6,29 @@ import Graphics.Gloss
 
 import Game
 
-boardAsRunningPicture board = Blank
+boardDotColor = makeColorI 255 255 255 255               -- white
+player1Color = makeColorI 255 50 50 255                  -- red
+player2Color = makeColorI 50 100 255 255                 -- blue
+tieColor = greyN 0.5
+
+boardAsRunningPicture :: Board -> Picture
+boardAsRunningPicture board =
+    pictures [ color boardDotColor dotsOfBoard
+             , color player1Color $ player1Dashes board
+             , color player2Color $ player2Dashes board
+             ]
 
 outcomeColor (Just Player1) = makeColorI 255 50 50 255     -- red
 outcomeColor (Just Player2) = makeColorI 50 100 255 255    -- blue
 outcomeColor Nothing = greyN 0.5
 
+translateDash :: Picture -> Int -> Int -> Float -> Float -> Picture
 translateDash picture dot1Row dot1Column ex ey =
     translate x y picture
     where x = fromIntegral dot1Column * boxWidth + boxWidth * ex
           y = fromIntegral dot1Row * boxHeight + boxHeight * ey
 
+snapPictureToDash :: Picture -> ((Int, Int), (Int, Int)) -> Picture
 snapPictureToDash picture ((dot1Row, dot1Column), (dot2Row, dot2Column)) =
     if dot1Row == dot2Row
         then translateDash picture dot1Row dot1Column 0.5 0
@@ -48,12 +60,14 @@ dotsOfBoard =
     $ concatMap (\i -> drawRowDots i)
      [0 .. fromIntegral (n - 1)]
 
+boardAsPicture :: Board -> Picture
 boardAsPicture board =
     pictures [ dotsOfBoard,
                player1Dashes board,
                player2Dashes board
              ]
 
+boardAsGameOverPicture :: Dash -> Board -> Picture
 boardAsGameOverPicture winner board =
     color (outcomeColor winner) (boardAsPicture board)
 
