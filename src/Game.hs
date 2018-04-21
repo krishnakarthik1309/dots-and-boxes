@@ -18,6 +18,9 @@ data Game = Game { gameBoard    :: Board
                  , gamePlayer   :: Player
                  , gameState    :: State
                  , marker       :: Marker
+                 , player1Score :: Int
+                 , player2Score :: Int
+                 , gameWinner   :: Maybe Player
                  } deriving (Eq, Show)
 
 -- #TODO: Number of Dots
@@ -41,5 +44,8 @@ initialGame = Game { gameBoard = array indexRange $ zip (range indexRange) (cycl
                    , gamePlayer = Player1
                    , gameState = Running
                    , marker = Marker (0, 0) Nothing
+                   , player1Score = 0
+                   , player2Score = 0
+                   , gameWinner = Nothing
                    }
                    where indexRange = (((0, 0), (0, 0)), ((n-1, n-1), (n-1, n-1)))
