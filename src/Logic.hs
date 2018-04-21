@@ -19,26 +19,26 @@ updateBoxNotFormedGame game = game { marker = (marker game) { toggled = Nothing 
                               where
                                 opposite currPlayer = if currPlayer == Player1 then Player2 else Player1
 
-updateBoxFormedGame :: Game -> Game
-updateBoxFormedGame game =  game { marker = (marker game) { toggled = Nothing }
-                                 , player1Score = if ((gamePlayer game) == Player1) then (1 + (player1Score game)) else (player1Score game)
-                                 , player2Score = if ((gamePlayer game) == Player2) then (1 + (player2Score game)) else (player2Score game)
-                                 , gameWinner = winner
-                                 , gameState = getState
-                                 }
-                            where
-                                winner = if gamePlayer game == Player1 && ((player1Score game) + 1) * 2 > ((n-1) * (n-1))
-                                            then Just Player1
-                                            else (if gamePlayer game == Player2 && ((player2Score game) + 1) * 2 > ((n-1) * (n-1))
-                                                    then Just Player2
-                                                    else Nothing)
-                                getState = if winner == Nothing then Running else GameOver winner
+updateBoxFormedGame :: Game -> Int -> Game
+updateBoxFormedGame game numBoxFormed =  game { marker = (marker game) { toggled = Nothing }
+                                        , player1Score = if ((gamePlayer game) == Player1) then (numBoxFormed + (player1Score game)) else (player1Score game)
+                                        , player2Score = if ((gamePlayer game) == Player2) then (numBoxFormed + (player2Score game)) else (player2Score game)
+                                        , gameWinner = winner
+                                        , gameState = getState
+                                        }
+                                        where
+                                                winner = if gamePlayer game == Player1 && ((player1Score game) + numBoxFormed) * 2 > ((n-1) * (n-1))
+                                                        then Just Player1
+                                                        else (if gamePlayer game == Player2 && ((player2Score game) + numBoxFormed) * 2 > ((n-1) * (n-1))
+                                                                then Just Player2
+                                                                else Nothing)
+                                                getState = if winner == Nothing then Running else GameOver winner
 
 drawLine :: Game -> Game
 drawLine game
     | (isNothing newBoard)  = game
-    | otherwise             = if isBoxFormed
-                                then updateBoxFormedGame newGame
+    | otherwise             = if numBoxFormed /= 0
+                                then updateBoxFormedGame newGame numBoxFormed
                                 else updateBoxNotFormedGame newGame
     where
         board       = gameBoard game
@@ -49,29 +49,33 @@ drawLine game
                         || (abs (snd p0 - snd p1) == 1 && fst p0 == fst p1)
                     )
                     &&  (board ! (p0, p1) == Nothing)
-        isBoxFormed = if (abs (fst p0 - fst p1) == 1 && snd p0 == snd p1)
-                        then isLeftBoxFormed || isRightBoxFormed
-                        else isTopBoxFormed  || isBottomBoxFormed
-        isLeftBoxFormed     = if snd p0 > 0
-                                then    (board ! ((fst p0, snd p0 - 1), (fst p1, snd p1 - 1)) /= Nothing)
+        numBoxFormed = if (abs (fst p0 - fst p1) == 1 && snd p0 == snd p1)
+                        then isLeftBoxFormed + isRightBoxFormed
+                        else isTopBoxFormed  + isBottomBoxFormed
+        isLeftBoxFormed     = if (      snd p0 > 0
+                                        && (board ! ((fst p0, snd p0 - 1), (fst p1, snd p1 - 1)) /= Nothing)
                                         && (board ! ((fst p0, snd p0), (fst p0, snd p0 - 1)) /= Nothing)
                                         && (board ! ((fst p1, snd p1), (fst p1, snd p1 - 1)) /= Nothing)
-                                else False
-        isRightBoxFormed    = if snd p0 < (n - 1)
-                                then    (board ! ((fst p0, snd p0 + 1), (fst p1, snd p1 + 1)) /= Nothing)
+                                 )      then 1
+                                        else 0
+        isRightBoxFormed    = if (      snd p0 < (n - 1)
+                                        && (board ! ((fst p0, snd p0 + 1), (fst p1, snd p1 + 1)) /= Nothing)
                                         && (board ! ((fst p0, snd p0), (fst p0, snd p0 + 1)) /= Nothing)
                                         && (board ! ((fst p1, snd p1), (fst p1, snd p1 + 1)) /= Nothing)
-                                else False
-        isTopBoxFormed      = if fst p0 < (n - 1)
-                                then    (board ! ((fst p0 + 1, snd p0), (fst p1 + 1, snd p1)) /= Nothing)
+                                 )      then 1
+                                        else 0
+        isTopBoxFormed      = if (      fst p0 < (n - 1)
+                                        && (board ! ((fst p0 + 1, snd p0), (fst p1 + 1, snd p1)) /= Nothing)
                                         && (board ! ((fst p0, snd p0), (fst p0 + 1, snd p0)) /= Nothing)
                                         && (board ! ((fst p1, snd p1), (fst p1 + 1, snd p1)) /= Nothing)
-                                else False
-        isBottomBoxFormed   = if fst p0 > 0
-                                then    (board ! ((fst p0 - 1, snd p0), (fst p1 - 1, snd p1)) /= Nothing)
+                                 )      then 1
+                                        else 0
+        isBottomBoxFormed   = if (      fst p0 > 0
+                                        && (board ! ((fst p0 - 1, snd p0), (fst p1 - 1, snd p1)) /= Nothing)
                                         && (board ! ((fst p0, snd p0), (fst p0 - 1, snd p0)) /= Nothing)
                                         && (board ! ((fst p1, snd p1), (fst p1 - 1, snd p1)) /= Nothing)
-                                else False
+                                 )      then 1
+                                        else 0
         
         stepBoard :: Board -> Maybe Board
         stepBoard board
