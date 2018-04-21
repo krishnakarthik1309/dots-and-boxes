@@ -1,6 +1,7 @@
 module Rendering where
 
 import Data.Array
+import Data.Maybe (maybe, catMaybes, fromJust, isJust, isNothing)
 
 import Graphics.Gloss
 
@@ -19,8 +20,15 @@ translatePos (r, c) = (boxWidth *  fromIntegral r, boxWidth * fromIntegral c)
 
 drawMarker :: Marker -> Picture
 drawMarker m =  let (tx, ty) = translatePos $ position m
-                    marker = color tGreen $ translate tx ty $ thickCircle 15 6
+                    marker = color tGreen $ translate ty tx $ thickCircle 15 6
                 in  marker
+
+drawToggled :: Marker -> Picture
+drawToggled m = let tog = toggled m
+                    (tx, ty) = translatePos $ maybe (0, 0) id tog
+                    toggler = color tYellow $ translate ty tx $ thickCircle 15 6
+                in  if (isNothing tog)  then Blank
+                                        else toggler
 
 boardAsRunningPicture :: Game -> Picture
 boardAsRunningPicture game =
@@ -28,6 +36,7 @@ boardAsRunningPicture game =
              , color player1Color $ player1Dashes (gameBoard game)
              , color player2Color $ player2Dashes (gameBoard game)
              , drawMarker (marker game)
+             , drawToggled (marker game)
              ]
 
 outcomeColor (Just Player1) = makeColorI 255 50 50 255     -- red
@@ -43,8 +52,12 @@ translateDash picture dot1Row dot1Column ex ey =
 snapPictureToDash :: Picture -> ((Int, Int), (Int, Int)) -> Picture
 snapPictureToDash picture ((dot1Row, dot1Column), (dot2Row, dot2Column)) =
     if dot1Row == dot2Row
-        then translateDash picture dot1Row dot1Column 0.5 0
-        else translateDash (rotate 90 picture) dot1Row dot1Column 0 0.5
+        then (if dot1Column > dot2Column
+                then translateDash picture dot1Row dot2Column 0.5 0
+                else translateDash picture dot1Row dot1Column 0.5 0)
+        else (if dot1Row < dot2Row
+                then translateDash (rotate 90 picture) dot1Row dot1Column 0 0.5
+                else translateDash (rotate 90 picture) dot2Row dot1Column 0 0.5)
 
 linePicture :: Picture
 linePicture = pictures [rectangleSolid boxWidth 5.0]
@@ -60,7 +73,7 @@ player1Dashes :: Board -> Picture
 player1Dashes board = dashesOfBoard board (Just Player1) linePicture
 
 player2Dashes :: Board -> Picture
-player2Dashes board = dashesOfBoard board (Just Player1) linePicture
+player2Dashes board = dashesOfBoard board (Just Player2) linePicture
 
 drawRowDots rowNum = concatMap (\i -> [ translate (i * boxWidth) (rowNum * boxHeight) (thickCircle 1.0 2.0)
                               ])
@@ -77,7 +90,8 @@ boardAsPicture game =
     pictures [ dotsOfBoard,
                player1Dashes (gameBoard game),
                player2Dashes (gameBoard game),
-               drawMarker (marker game)
+               drawMarker (marker game),
+               drawToggled (marker game)
              ]
 
 boardAsGameOverPicture :: Dash -> Game -> Picture
