@@ -104,4 +104,4 @@ gameAsPicture game = translate (fromIntegral screenWidth * (-0.5) + boxWidth)
                                frame
     where frame = case gameState game of
                     Running -> boardAsRunningPicture game
-                    GameOver winner -> boardAsGameOverPicture winner game
+                    GameOver winner -> boardAsGameOverPicture (gameWinner game) game
