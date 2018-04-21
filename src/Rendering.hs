@@ -11,11 +11,23 @@ player1Color = makeColorI 255 50 50 255                  -- red
 player2Color = makeColorI 50 100 255 255                 -- blue
 tieColor = greyN 0.5
 
-boardAsRunningPicture :: Board -> Picture
-boardAsRunningPicture board =
+tYellow = makeColorI 255 0 255 255
+tGreen  = makeColorI 0 255 0 255
+
+translatePos :: Pos -> (Float, Float)
+translatePos (r, c) = (boxWidth *  fromIntegral r, boxWidth * fromIntegral c)
+
+drawMarker :: Marker -> Picture
+drawMarker m =  let (tx, ty) = translatePos $ position m
+                    marker = color tGreen $ translate tx ty $ thickCircle 15 6
+                in  marker
+
+boardAsRunningPicture :: Game -> Picture
+boardAsRunningPicture game =
     pictures [ color boardDotColor dotsOfBoard
-             , color player1Color $ player1Dashes board
-             , color player2Color $ player2Dashes board
+             , color player1Color $ player1Dashes (gameBoard game)
+             , color player2Color $ player2Dashes (gameBoard game)
+             , drawMarker (marker game)
              ]
 
 outcomeColor (Just Player1) = makeColorI 255 50 50 255     -- red
@@ -60,21 +72,22 @@ dotsOfBoard =
     $ concatMap (\i -> drawRowDots i)
      [0 .. fromIntegral (n - 1)]
 
-boardAsPicture :: Board -> Picture
-boardAsPicture board =
+boardAsPicture :: Game -> Picture
+boardAsPicture game =
     pictures [ dotsOfBoard,
-               player1Dashes board,
-               player2Dashes board
+               player1Dashes (gameBoard game),
+               player2Dashes (gameBoard game),
+               drawMarker (marker game)
              ]
 
-boardAsGameOverPicture :: Dash -> Board -> Picture
-boardAsGameOverPicture winner board =
-    color (outcomeColor winner) (boardAsPicture board)
+boardAsGameOverPicture :: Dash -> Game -> Picture
+boardAsGameOverPicture winner game =
+    color (outcomeColor winner) (boardAsPicture game)
 
 gameAsPicture :: Game -> Picture
 gameAsPicture game = translate (fromIntegral screenWidth * (-0.5) + boxWidth)
                                (fromIntegral screenHeight * (-0.5) + boxHeight)
                                frame
     where frame = case gameState game of
-                    Running -> boardAsRunningPicture (gameBoard game)
-                    GameOver winner -> boardAsGameOverPicture winner (gameBoard game)
+                    Running -> boardAsRunningPicture game
+                    GameOver winner -> boardAsGameOverPicture winner game
