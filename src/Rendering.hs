@@ -15,6 +15,10 @@ tieColor = greyN 0.5
 tYellow = makeColorI 255 0 255 255
 tGreen  = makeColorI 0 255 0 255
 
+pMessage game = color white
+                $ translate (boxWidth * (-1)) (boxWidth * (-1)) $ scale 0.15 0.15
+                $ text $ (message game)
+
 translatePos :: Pos -> (Float, Float)
 translatePos (r, c) = (boxWidth *  fromIntegral r, boxWidth * fromIntegral c)
 
@@ -37,6 +41,7 @@ boardAsRunningPicture game =
              , color player2Color $ player2Dashes (gameBoard game)
              , drawMarker (marker game)
              , drawToggled (marker game)
+             , pMessage game
              ]
 
 outcomeColor (Just Player1) = makeColorI 255 50 50 255     -- red
@@ -91,7 +96,8 @@ boardAsPicture game =
                player1Dashes (gameBoard game),
                player2Dashes (gameBoard game),
                drawMarker (marker game),
-               drawToggled (marker game)
+               drawToggled (marker game),
+               pMessage game
              ]
 
 boardAsGameOverPicture :: Dash -> Game -> Picture

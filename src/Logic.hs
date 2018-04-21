@@ -6,6 +6,9 @@ import Data.Array
 import Data.Maybe (maybe, catMaybes, fromJust, isJust, isNothing)
 import Graphics.Gloss.Interface.Pure.Game
 
+updateMessage:: Game -> Game
+updateMessage game = game { message = "Player1: " ++ (show (player1Score game)) ++ ", Player2: " ++ (show (player2Score game)) }
+
 setToggled :: Maybe Pos -> Game -> Game
 setToggled Nothing game = game { marker = (marker game) {toggled = Nothing} }
 setToggled (Just pos) game = game { marker = (marker game) {toggled = Just pos} }
@@ -21,7 +24,8 @@ updateBoxFormedGame game =  game { marker = (marker game) { toggled = Nothing }
                                  , player1Score = if ((gamePlayer game) == Player1) then (1 + (player1Score game)) else (player1Score game)
                                  , player2Score = if ((gamePlayer game) == Player2) then (1 + (player2Score game)) else (player2Score game)
                                  , gameWinner = winner
-                                 , gameState = getState }
+                                 , gameState = getState
+                                 }
                             where
                                 winner = if gamePlayer game == Player1 && ((player1Score game) + 1) * 2 > ((n-1) * (n-1))
                                             then Just Player1
@@ -93,7 +97,7 @@ transformGame (EventKey (SpecialKey KeyRight) Down _ _) game = setMarker (movePo
 transformGame (EventKey (SpecialKey KeySpace) Down _ _) game
     | isNothing tog         = setToggled (Just pos) game
     | pos == fromJust tog   = setToggled Nothing game
-    | otherwise             = drawLine game
+    | otherwise             = updateMessage (drawLine game)
     where
         tog = toggled . marker $ game
         pos = position . marker $ game
