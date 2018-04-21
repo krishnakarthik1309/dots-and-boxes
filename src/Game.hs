@@ -12,7 +12,7 @@ type Box = Maybe Player
 type Dash = Maybe Player
 
 data Marker = Marker { position :: Pos
-                     , toggle   :: Maybe Pos} deriving (Eq, Show)
+                     , toggled  :: Maybe Pos} deriving (Eq, Show)
 
 data Game = Game { gameBoard    :: Board
                  , gamePlayer   :: Player
