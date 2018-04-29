@@ -8,10 +8,7 @@ import Data.Maybe (maybe, catMaybes, fromJust, isJust, isNothing)
 import Graphics.Gloss.Interface.Pure.Game
 
 updateMessage :: Game -> Game
-updateMessage game = game { message = "Player1: " ++ (show (player1Score game)) ++ ", Player2: " ++ (show (player2Score game)) ++ "Possible Moves: " ++ (show (getOnes game))}
-
-getOnes :: Game -> [(Pos, Pos)]
-getOnes game = [i | i <- indices (possibleMoves game), let x = (possibleMoves game)!i, x == 1]
+updateMessage game = game { message = "Player1: " ++ (show (player1Score game)) ++ ", Player2: " ++ (show (player2Score game))}
 
 setToggled :: Maybe Pos -> Game -> Game
 setToggled Nothing game = game { marker = (marker game) {toggled = Nothing} }
@@ -88,14 +85,14 @@ drawLine game
                                         && (board ! ((fst p1, snd p1), (fst p1 - 1, snd p1)) /= Nothing)
                                  )      then 1
                                         else 0
-        
+
         stepBoard :: Board -> Maybe Board
         stepBoard board
             | isValid   = Just $ board // [((p0, p1), Just (gamePlayer game)), ((p1, p0), Just (gamePlayer game))]
             | otherwise = Nothing
 
 removeMoves :: (Pos, Pos) -> Possibilities -> Possibilities
-removeMoves (p0, p1) setofMoves = setofMoves // [((p0, p1), 1)]
+removeMoves (p0, p1) setofMoves = [(a, b) | (a, b) <- setofMoves, a /= p0 && b /= p1]
 
 
 movePos :: Pos -> SpecialKey -> Pos

@@ -8,7 +8,7 @@ data Dot = Selected | NotSelected deriving (Eq, Show)
 
 type Pos = (Int, Int)
 type Board = Array (Pos, Pos) Dash
-type Possibilities = Array (Pos, Pos) Int
+type Possibilities = [(Pos, Pos)]
 type Box = Maybe Player
 type Dash = Maybe Player
 
@@ -42,6 +42,11 @@ boxWidth = fromIntegral (min screenHeight screenWidth) / fromIntegral (n + 1)
 boxHeight :: Float
 boxHeight = fromIntegral (min screenHeight screenWidth) / fromIntegral (n + 1)
 
+isValidPair p0 p1 = (abs (fst p0 - fst p1) == 1 && snd p0 == snd p1)
+                        || (abs (snd p0 - snd p1) == 1 && fst p0 == fst p1)
+
+initializePossibleMoves pm = [(p0, p1) | (p0, p1) <- indices (pm), isValidPair p0 p1]
+
 -- Game
 initialGame = Game { gameBoard = array indexRange $ zip (range indexRange) (cycle [Nothing])
                    , gamePlayer = Player1
@@ -51,6 +56,6 @@ initialGame = Game { gameBoard = array indexRange $ zip (range indexRange) (cycl
                    , player2Score = 0
                    , gameWinner = Nothing
                    , message = "Player1: 0, Player2: 0"
-                   , possibleMoves = array indexRange $ zip (range indexRange) (cycle [0])
+                   , possibleMoves = initializePossibleMoves (array indexRange $ zip (range indexRange) (cycle [0]))
                    }
                    where indexRange = (((0, 0), (0, 0)), ((n-1, n-1), (n-1, n-1)))
