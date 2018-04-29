@@ -7,11 +7,11 @@ import Data.Array
 import Data.Maybe (maybe, catMaybes, fromJust, isJust, isNothing)
 import Graphics.Gloss.Interface.Pure.Game
 
-updateMessage :: Game -> Game
-updateMessage game = game { message = "Player1: " ++ (show (player1Score game)) ++ ", Player2: " ++ (show (player2Score game)) ++ "Possible Moves: " ++ (show (getOnes game))}
-
 getOnes :: Game -> [(Pos, Pos)]
 getOnes game = [i | i <- indices (possibleMoves game), let x = (possibleMoves game)!i, x == 1]
+
+updateMessage:: Game -> Game
+updateMessage game = game { message = "Player1: " ++ (show (player1Score game)) ++ ", Player2: " ++ (show (player2Score game)) }
 
 setToggled :: Maybe Pos -> Game -> Game
 setToggled Nothing game = game { marker = (marker game) {toggled = Nothing} }
@@ -97,7 +97,6 @@ drawLine game
 removeMoves :: (Pos, Pos) -> Possibilities -> Possibilities
 removeMoves (p0, p1) setofMoves = setofMoves // [((p0, p1), 1)]
 
-
 movePos :: Pos -> SpecialKey -> Pos
 movePos (a,b) KeyLeft  = if (b > 0) then (a,b-1) else (a,b)
 movePos (a,b) KeyRight = if (b < (n - 1)) then (a,b+1) else (a,b)
@@ -120,4 +119,5 @@ transformGame (EventKey (SpecialKey KeySpace) Down _ _) game
     where
         tog = toggled . marker $ game
         pos = position . marker $ game
+
 transformGame _ game = game
