@@ -8,6 +8,7 @@ data Dot = Selected | NotSelected deriving (Eq, Show)
 
 type Pos = (Int, Int)
 type Board = Array (Pos, Pos) Dash
+type Possibilities = Array (Pos, Pos) Int
 type Box = Maybe Player
 type Dash = Maybe Player
 
@@ -22,6 +23,7 @@ data Game = Game { gameBoard    :: Board
                  , player2Score :: Int
                  , gameWinner   :: Maybe Player
                  , message      :: String
+                 , possibleMoves :: Possibilities
                  } deriving (Eq, Show)
 
 -- #TODO: Number of Dots
@@ -49,5 +51,6 @@ initialGame = Game { gameBoard = array indexRange $ zip (range indexRange) (cycl
                    , player2Score = 0
                    , gameWinner = Nothing
                    , message = "Player1: 0, Player2: 0"
+                   , possibleMoves = array indexRange $ zip (range indexRange) (cycle [0])
                    }
                    where indexRange = (((0, 0), (0, 0)), ((n-1, n-1), (n-1, n-1)))
