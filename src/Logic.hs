@@ -14,34 +14,47 @@ setToggled :: Maybe Pos -> Game -> Game
 setToggled Nothing game = game { marker = (marker game) {toggled = Nothing} }
 setToggled (Just pos) game = game { marker = (marker game) {toggled = Just pos} }
 
-updGame :: Game -> (Pos, Pos) -> Game
-updGame game (p0, p1) = game { marker = (marker game) { toggled = Nothing }
-                      , gamePlayer = opposite (gamePlayer game)
-                      , possibleMoves = removeMoves (p0, p1) (possibleMoves game)
-                      }
-                      where
-                      opposite currPlayer = if currPlayer == Player1 then Player2 else Player1
+updNoBoxGame :: Game -> (Pos, Pos) -> Game
+updNoBoxGame game (p0, p1) =
+    game { marker = (marker game) { toggled = Nothing }
+         , gamePlayer = opposite (gamePlayer game)
+         , possibleMoves = removeMoves (p0, p1) (possibleMoves game)
+         }
+         where
+         opposite currPlayer = if currPlayer == Player1 then Player2 else Player1
+
+updBoxGame :: Game -> Int -> (Pos, Pos) -> Game
+updBoxGame game numBoxFormed (p0, p1) =
+    game { marker = (marker game) { toggled = Nothing}
+         , player1Score = if ((gamePlayer game) == Player1) then (numBoxFormed + (player1Score game)) else (player1Score game)
+         , player2Score = if ((gamePlayer game) == Player2) then (numBoxFormed + (player2Score game)) else (player2Score game)
+         , gameWinner = winner
+         , gameState = getState
+         , possibleMoves = removeMoves (p0, p1) (possibleMoves game)
+         }
+         where
+         winner = if gamePlayer game == Player1 && ((player1Score game) + numBoxFormed) * 2 > ((n-1) * (n-1))
+                   then Just Player1
+                   else (if gamePlayer game == Player2 && ((player2Score game) + numBoxFormed) * 2 > ((n-1) * (n-1))
+                            then Just Player2
+                            else Nothing)
+         getState = if winner == Nothing then Running else GameOver winner
 
 updateBoxNotFormedGame :: Game -> (Pos, Pos) -> Game
-updateBoxNotFormedGame game (p0, p1) = if gamePlayer game == Player2
-                                          then updGame game (p0, p1)
-                                          else updateMessage (drawLine (playComputer (updGame game (p0, p1))))
+updateBoxNotFormedGame game (p0, p1) =
+      if gameMode == humanMode || gamePlayer game == Player2
+        then updNoBoxGame game (p0, p1)
+        else updateMessage (drawLine (playComputer (updNoBoxGame game (p0, p1))))
 
 updateBoxFormedGame :: Game -> Int -> (Pos, Pos) -> Game
-updateBoxFormedGame game numBoxFormed (p0, p1) = game { marker = (marker game) { toggled = Nothing }
-                                               , player1Score = if ((gamePlayer game) == Player1) then (numBoxFormed + (player1Score game)) else (player1Score game)
-                                               , player2Score = if ((gamePlayer game) == Player2) then (numBoxFormed + (player2Score game)) else (player2Score game)
-                                               , gameWinner = winner
-                                               , gameState = getState
-                                               , possibleMoves = removeMoves (p0, p1) (possibleMoves game)
-                                               }
-                                                 where
-                                                 winner = if gamePlayer game == Player1 && ((player1Score game) + numBoxFormed) * 2 > ((n-1) * (n-1))
-                                                             then Just Player1
-                                                             else (if gamePlayer game == Player2 && ((player2Score game) + numBoxFormed) * 2 > ((n-1) * (n-1))
-                                                                      then Just Player2
-                                                                      else Nothing)
-                                                 getState = if winner == Nothing then Running else GameOver winner
+updateBoxFormedGame game numBoxFormed (p0, p1) =
+  if gameMode /= humanMode && gamePlayer game == Player2
+    then (if gameState newGame /= Running
+            then newGame
+            else updateMessage (drawLine (playComputer newGame)))
+    else updBoxGame game numBoxFormed (p0, p1)
+    where
+        newGame = updBoxGame game numBoxFormed (p0, p1)
 
 drawLine :: Game -> Game
 drawLine game
@@ -92,8 +105,7 @@ drawLine game
             | otherwise = Nothing
 
 removeMoves :: (Pos, Pos) -> Possibilities -> Possibilities
-removeMoves (p0, p1) setofMoves = [(a, b) | (a, b) <- setofMoves, a /= p0 && b /= p1]
-
+removeMoves (p0, p1) setofMoves = [(a, b) | (a, b) <- setofMoves, (a /= p0 || b /= p1) && (a /= p1 || b /= p0)]
 
 movePos :: Pos -> SpecialKey -> Pos
 movePos (a,b) KeyLeft  = if (b > 0) then (a,b-1) else (a,b)

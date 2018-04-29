@@ -30,6 +30,10 @@ data Game = Game { gameBoard    :: Board
 n :: Int
 n = 8
 
+humanMode = 0
+computerEasy = 1
+gameMode = computerEasy
+
 screenWidth :: Int
 screenWidth = 640
 
@@ -42,20 +46,22 @@ boxWidth = fromIntegral (min screenHeight screenWidth) / fromIntegral (n + 1)
 boxHeight :: Float
 boxHeight = fromIntegral (min screenHeight screenWidth) / fromIntegral (n + 1)
 
-isValidPair p0 p1 = (abs (fst p0 - fst p1) == 1 && snd p0 == snd p1)
-                        || (abs (snd p0 - snd p1) == 1 && fst p0 == fst p1)
+isValidPair p0 p1 = (abs (fst p0 - fst p1) == 1 && snd p0 == snd p1) ||
+                    (abs (snd p0 - snd p1) == 1 && fst p0 == fst p1)
 
-initializePossibleMoves pm = [(p0, p1) | (p0, p1) <- indices (pm), isValidPair p0 p1]
+initializePossibleMoves pm =
+  [(p0, p1) | (p0, p1) <- indices (pm), isValidPair p0 p1]
 
 -- Game
-initialGame = Game { gameBoard = array indexRange $ zip (range indexRange) (cycle [Nothing])
-                   , gamePlayer = Player1
-                   , gameState = Running
-                   , marker = Marker (0, 0) Nothing
-                   , player1Score = 0
-                   , player2Score = 0
-                   , gameWinner = Nothing
-                   , message = "Player1: 0, Player2: 0"
-                   , possibleMoves = initializePossibleMoves (array indexRange $ zip (range indexRange) (cycle [0]))
-                   }
-                   where indexRange = (((0, 0), (0, 0)), ((n-1, n-1), (n-1, n-1)))
+initialGame =
+  Game { gameBoard = array indexRange $ zip (range indexRange) (cycle [Nothing])
+         , gamePlayer = Player1
+         , gameState = Running
+         , marker = Marker (0, 0) Nothing
+         , player1Score = 0
+         , player2Score = 0
+         , gameWinner = Nothing
+         , message = "Player1: 0, Player2: 0"
+         , possibleMoves = initializePossibleMoves (array indexRange $ zip (range indexRange) (cycle [0]))
+         }
+         where indexRange = (((0, 0), (0, 0)), ((n-1, n-1), (n-1, n-1)))

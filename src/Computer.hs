@@ -7,10 +7,10 @@ import Game
 import Rendering
 
 r :: IO Int
-r = getStdRandom (randomR (0, 200))
+r = getStdRandom (randomR (0, (max (4*n*n) 200)))
 
 z :: [IO Int]
-z = [r | a <- [0..200]]
+z = [r | a <- [0..(max (4*n*n) 200)]]
 
 c :: Int -> [Int]
 c l = [(unsafePerformIO v) `mod` l | v <- z]
@@ -18,7 +18,7 @@ c l = [(unsafePerformIO v) `mod` l | v <- z]
 easyMove :: [(Pos, Pos)] -> (Pos, Pos)
 easyMove moves = moves !! (head d)
                  where
-                 l = length moves
+                 l = (length moves) - 1
                  d = drop (64 - l) (c l)
 
 updateMarker :: (Pos, Pos) -> Game -> Game
