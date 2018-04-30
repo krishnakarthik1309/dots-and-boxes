@@ -22,16 +22,16 @@ pMessage game = color white
 translatePos :: Game -> Pos -> (Float, Float)
 translatePos game (r, c) = ((boxWidth game) *  fromIntegral r, (boxWidth game) * fromIntegral c)
 
-drawMarker :: Game -> Marker -> Picture
-drawMarker game m =
+drawMarker :: Game -> Picture
+drawMarker game =
     let
-        (tx, ty) = translatePos game $ position m
-        marker = color tGreen $ translate ty tx $ thickCircle 15 6
-    in  marker
+        (tx, ty) = translatePos game $ position (marker game)
+        markerPic = color tGreen $ translate ty tx $ thickCircle 15 6
+    in  markerPic
 
-drawToggled :: Game -> Marker -> Picture
-drawToggled game m =
-    let tog = toggled m
+drawToggled :: Game -> Picture
+drawToggled game =
+    let tog = toggled (marker game)
         (tx, ty) = translatePos game $ maybe (0, 0) id tog
         toggler = color tYellow $ translate ty tx $ thickCircle 15 6
     in  if (isNothing tog)
@@ -41,10 +41,10 @@ drawToggled game m =
 boardAsRunningPicture :: Game -> Picture
 boardAsRunningPicture game =
     pictures [ color boardDotColor (dotsOfBoard game)
-             , color player1Color $ player1Dashes game (gameBoard game)
-             , color player2Color $ player2Dashes game (gameBoard game)
-             , drawMarker game (marker game)
-             , drawToggled game (marker game)
+             , color player1Color $ player1Dashes game
+             , color player2Color $ player2Dashes game
+             , drawMarker game
+             , drawToggled game
              , pMessage game
              ]
 
@@ -71,18 +71,18 @@ snapPictureToDash game picture ((dot1Row, dot1Column), (dot2Row, dot2Column)) =
 linePicture :: Game -> Picture
 linePicture game = pictures [rectangleSolid (boxWidth game) 5.0]
 
-dashesOfBoard :: Game -> Board -> Dash -> Picture -> Picture
-dashesOfBoard game board dash dashPicture =
+dashesOfBoard :: Game -> Dash -> Picture -> Picture
+dashesOfBoard game dash dashPicture =
     pictures
     $ map (snapPictureToDash game dashPicture . fst)
     $ filter (\(_, e) -> e == dash)
-    $ assocs board
+    $ assocs (gameBoard game)
 
-player1Dashes :: Game -> Board -> Picture
-player1Dashes game board = dashesOfBoard game board (Just Player1) (linePicture game)
+player1Dashes :: Game -> Picture
+player1Dashes game = dashesOfBoard game (Just Player1) (linePicture game)
 
-player2Dashes :: Game -> Board -> Picture
-player2Dashes game board = dashesOfBoard game board (Just Player2) (linePicture game)
+player2Dashes :: Game -> Picture
+player2Dashes game = dashesOfBoard game (Just Player2) (linePicture game)
 
 drawRowDots rowNum game =
     concatMap (\i -> [ translate (i * (boxWidth game)) (rowNum * (boxHeight game)) (thickCircle 1.0 2.0)]) [0 .. fromIntegral (n - 1)]
@@ -98,16 +98,16 @@ dotsOfBoard game =
 boardAsPicture :: Game -> Picture
 boardAsPicture game =
     pictures [ dotsOfBoard game,
-               player1Dashes game (gameBoard game),
-               player2Dashes game (gameBoard game),
-               drawMarker game (marker game),
-               drawToggled game (marker game),
+               player1Dashes game,
+               player2Dashes game,
+               drawMarker game,
+               drawToggled game,
                pMessage game
              ]
 
-boardAsGameOverPicture :: Dash -> Game -> Picture
-boardAsGameOverPicture winner game =
-    color (outcomeColor winner) (boardAsPicture game)
+boardAsGameOverPicture :: Game -> Picture
+boardAsGameOverPicture game =
+    color (outcomeColor (gameWinner game)) (boardAsPicture game)
 
 gameAsPicture :: Game -> Picture
 gameAsPicture game =
@@ -116,4 +116,4 @@ gameAsPicture game =
               frame
     where frame = case gameState game of
                     Running -> boardAsRunningPicture game
-                    GameOver winner -> boardAsGameOverPicture (gameWinner game) game
+                    GameOver winner -> boardAsGameOverPicture game
