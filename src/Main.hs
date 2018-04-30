@@ -15,4 +15,6 @@ main :: IO ()
 main = do
         numDotsString <- getLine
         let numDots = (read numDotsString :: Int)
-        play window backgroundColor 30 (initialGame numDots) gameAsPicture transformGame (const id)
+        gameModeString <- getLine
+        let gameMode = (read gameModeString :: Int)
+        play window backgroundColor 30 (initialGame numDots gameMode) gameAsPicture transformGame (const id)

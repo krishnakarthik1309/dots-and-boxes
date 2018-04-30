@@ -25,15 +25,12 @@ data Game = Game { gameBoard     :: Board
                  , message       :: String
                  , possibleMoves :: Possibilities
                  , numDots       :: Int
+                 , gameMode      :: Int
                  } deriving (Eq, Show)
 
--- #TODO: Number of Dots
--- n :: Int
--- n = 8
-
-humanMode = 0
-computerEasy = 1
-gameMode = computerEasy
+-- CONSTANTS
+humanMode = 0 :: Int
+computerEasy = 1 :: Int
 
 screenWidth :: Int
 screenWidth = 640
@@ -58,18 +55,19 @@ initializePossibleMoves pm =
   [(p0, p1) | (p0, p1) <- indices (pm), isValidPair p0 p1]
 
 -- Game
-initialGame numDots =
+initialGame numDots gameMode =
   Game { gameBoard = array indexRange $ zip (range indexRange) (cycle [Nothing])
-         , gamePlayer = Player1
-         , gameState = Running
-         , marker = Marker (0, 0) Nothing
-         , player1Score = 0
-         , player2Score = 0
-         , gameWinner = Nothing
-         , message = "Player1: 0, Player2: 0"
-         , possibleMoves = initializePossibleMoves (array indexRange $ zip (range indexRange) (cycle [0]))
-         , numDots = numDots
-         }
-         where
-          n = numDots
-          indexRange = (((0, 0), (0, 0)), ((n-1, n-1), (n-1, n-1)))
+       , gamePlayer = Player1
+       , gameState = Running
+       , marker = Marker (0, 0) Nothing
+       , player1Score = 0
+       , player2Score = 0
+       , gameWinner = Nothing
+       , message = "Player1: 0, Player2: 0"
+       , possibleMoves = initializePossibleMoves (array indexRange $ zip (range indexRange) (cycle [0]))
+       , numDots = numDots
+       , gameMode = gameMode
+       }
+       where
+        n = numDots
+        indexRange = (((0, 0), (0, 0)), ((n-1, n-1), (n-1, n-1)))

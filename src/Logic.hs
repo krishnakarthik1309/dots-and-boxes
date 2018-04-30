@@ -43,13 +43,13 @@ updBoxGame game numBoxFormed (p0, p1) =
 
 updateBoxNotFormedGame :: Game -> (Pos, Pos) -> Game
 updateBoxNotFormedGame game (p0, p1) =
-      if gameMode == humanMode || gamePlayer game == Player2
+      if (gameMode game) == humanMode || gamePlayer game == Player2
         then updNoBoxGame game (p0, p1)
         else updateMessage (drawLine (playComputer (updNoBoxGame game (p0, p1))))
 
 updateBoxFormedGame :: Game -> Int -> (Pos, Pos) -> Game
 updateBoxFormedGame game numBoxFormed (p0, p1) =
-  if gameMode /= humanMode && gamePlayer game == Player2
+  if (gameMode game) /= humanMode && gamePlayer game == Player2
     then (if gameState newGame /= Running
             then newGame
             else updateMessage (drawLine (playComputer newGame)))
