@@ -12,4 +12,7 @@ window = InWindow "Dots and Boxes" (screenWidth, screenHeight) (100, 100)
 backgroundColor = makeColor 0 0 0 255
 
 main :: IO ()
-main = play window backgroundColor 30 initialGame gameAsPicture transformGame (const id)
+main = do
+        numDotsString <- getLine
+        let numDots = (read numDotsString :: Int)
+        play window backgroundColor 30 (initialGame numDots) gameAsPicture transformGame (const id)

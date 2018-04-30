@@ -33,6 +33,7 @@ updBoxGame game numBoxFormed (p0, p1) =
          , possibleMoves = removeMoves (p0, p1) (possibleMoves game)
          }
          where
+         n = numDots game
          winner = if gamePlayer game == Player1 && ((player1Score game) + numBoxFormed) * 2 > ((n-1) * (n-1))
                    then Just Player1
                    else (if gamePlayer game == Player2 && ((player2Score game) + numBoxFormed) * 2 > ((n-1) * (n-1))
@@ -63,6 +64,7 @@ drawLine game
                                 then updateBoxFormedGame newGame numBoxFormed (p0, p1)
                                 else updateBoxNotFormedGame newGame (p0, p1)
     where
+        n = numDots game
         board       = gameBoard game
         newBoard    = stepBoard board
         newGame     = game {gameBoard = fromJust newBoard}
@@ -107,21 +109,21 @@ drawLine game
 removeMoves :: (Pos, Pos) -> Possibilities -> Possibilities
 removeMoves (p0, p1) setofMoves = [(a, b) | (a, b) <- setofMoves, (a /= p0 || b /= p1) && (a /= p1 || b /= p0)]
 
-movePos :: Pos -> SpecialKey -> Pos
-movePos (a,b) KeyLeft  = if (b > 0) then (a,b-1) else (a,b)
-movePos (a,b) KeyRight = if (b < (n - 1)) then (a,b+1) else (a,b)
-movePos (a,b) KeyDown  = if (a > 0) then (a-1,b) else (a,b)
-movePos (a,b) KeyUp    = if (a < (n - 1)) then (a+1,b) else (a,b)
-movePos p     _        = p
+movePos :: Pos -> SpecialKey -> Int -> Pos
+movePos (a,b) KeyLeft  n = if (b > 0) then (a,b-1) else (a,b)
+movePos (a,b) KeyRight n = if (b < (n - 1)) then (a,b+1) else (a,b)
+movePos (a,b) KeyDown  n = if (a > 0) then (a-1,b) else (a,b)
+movePos (a,b) KeyUp    n = if (a < (n - 1)) then (a+1,b) else (a,b)
+movePos p     _        n = p
 
 setMarker :: Pos -> Game -> Game
 setMarker pos game = game { marker = (marker game) {position = pos} }
 
 transformGame :: Event -> Game -> Game
-transformGame (EventKey (SpecialKey KeyUp)    Down _ _) game = setMarker (movePos (position . marker $ game) KeyUp) game
-transformGame (EventKey (SpecialKey KeyDown)  Down _ _) game = setMarker (movePos (position . marker $ game) KeyDown) game
-transformGame (EventKey (SpecialKey KeyLeft)  Down _ _) game = setMarker (movePos (position . marker $ game) KeyLeft) game
-transformGame (EventKey (SpecialKey KeyRight) Down _ _) game = setMarker (movePos (position . marker $ game) KeyRight) game
+transformGame (EventKey (SpecialKey KeyUp)    Down _ _) game = setMarker (movePos (position . marker $ game) KeyUp (numDots game)) game
+transformGame (EventKey (SpecialKey KeyDown)  Down _ _) game = setMarker (movePos (position . marker $ game) KeyDown (numDots game)) game
+transformGame (EventKey (SpecialKey KeyLeft)  Down _ _) game = setMarker (movePos (position . marker $ game) KeyLeft (numDots game)) game
+transformGame (EventKey (SpecialKey KeyRight) Down _ _) game = setMarker (movePos (position . marker $ game) KeyRight (numDots game)) game
 transformGame (EventKey (SpecialKey KeySpace) Down _ _) game
     | isNothing tog         = setToggled (Just pos) game
     | pos == fromJust tog   = setToggled Nothing game
